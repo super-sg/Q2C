@@ -1,0 +1,16 @@
+streamlit
+python-dotenv
+langchain
+langchain-community
+langchain-google-genai
+sentence-transformers
+InstructorEmbedding
+faiss-cpu
+pypdf
+chromadb
+speechrecognition
+pyaudio
+Pillow
+streamlit-webrtc
+av
+deep-translator
