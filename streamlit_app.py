@@ -1,9 +1,7 @@
 import os
 import streamlit as st
-from backend import load_models, hybrid_search, preprocess_query
-from PIL import Image
-import io
-import base64
+from backend import load_models
+from backend_common import hybrid_search, preprocess_query, process_image_input
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -33,28 +31,6 @@ def load_models_cached():
 
 
 vectorstore, chain = load_models_cached()
-
-
-def process_image_input(uploaded_image):
-    """
-    Process uploaded image input.
-    Returns image data dictionary or None if processing fails.
-    """
-    if uploaded_image is not None:
-        try:
-            image = Image.open(uploaded_image)
-            img_byte_arr = io.BytesIO()
-            image.save(img_byte_arr, format='PNG')
-            img_byte_arr = img_byte_arr.getvalue()
-            img_base64 = base64.b64encode(img_byte_arr).decode()
-            return {
-                "image": image,
-                "base64": img_base64,
-                "description": "User uploaded an image related to their question"
-            }
-        except Exception as e:
-            return None
-    return None
 
 
 def process_voice_input():

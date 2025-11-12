@@ -1,7 +1,8 @@
 import os
 import streamlit as st
 import json
-from backend_multimodal import load_models, hybrid_search, preprocess_query, process_image_input
+from backend_multimodal import load_models
+from backend_common import hybrid_search, preprocess_query, process_image_input
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
