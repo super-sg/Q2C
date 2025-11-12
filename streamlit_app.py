@@ -23,7 +23,16 @@ if "conversation_context" not in st.session_state:
     st.session_state.conversation_context = ""
 
 
-vectorstore, chain = load_models()
+@st.cache_resource
+def load_models_cached():
+    """
+    Cache the model loading to avoid reloading on every rerun.
+    This significantly improves performance.
+    """
+    return load_models()
+
+
+vectorstore, chain = load_models_cached()
 
 
 def process_image_input(uploaded_image):
@@ -225,12 +234,12 @@ if prompt or image_data:
                         except:
                             expanded_docs = vectorstore.similarity_search_with_score(expanded_query, k=3)
                         
-                        # Combine and deduplicate results
+                        # Combine and deduplicate results using full content hash
                         all_docs = docs_with_scores + expanded_docs
                         seen_content = set()
                         unique_docs = []
                         for doc, score in all_docs:
-                            content_hash = hash(doc.page_content[:100])
+                            content_hash = hash(doc.page_content)
                             if content_hash not in seen_content:
                                 seen_content.add(content_hash)
                                 unique_docs.append((doc, score))
@@ -294,13 +303,9 @@ if prompt or image_data:
                     }
                     st.session_state.messages.append(assistant_message)
                     
-                    # Update conversation context
-                    new_context = f"Student: {query_text}\nAssistant: {result}"
-                    if len(st.session_state.conversation_context) > 2000:  # Keep context manageable
-                        # Keep only the last portion of the conversation
-                        st.session_state.conversation_context = st.session_state.conversation_context[-1000:] + "\n" + new_context
-                    else:
-                        st.session_state.conversation_context += "\n" + new_context
+                    # Prune old messages to keep memory usage reasonable (keep last 50 messages)
+                    if len(st.session_state.messages) > 50:
+                        st.session_state.messages = st.session_state.messages[-50:]
 
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
